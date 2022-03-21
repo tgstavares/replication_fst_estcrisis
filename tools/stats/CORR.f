@@ -1,0 +1,138 @@
+      SUBROUTINE CORR(X,Y,N,IWRITE,C)
+C
+C     PURPOSE--THIS SUBROUTINE COMPUTES THE
+C              SAMPLE CORRELATION COEFFICIENT
+C              BETWEEN THE 2 SETS OF DATA IN THE INPUT VECTORS X AND Y.
+C              THE SAMPLE CORRELATION COEFFICIENT WILL BE A SINGLE
+C              PRECISION VALUE BETWEEN -1.0 AND 1.0 (INCLUSIVELY).
+C     INPUT  ARGUMENTS--X      = THE SINGLE PRECISION VECTOR OF
+C                                (UNSORTED) OBSERVATIONS
+C                                WHICH CONSTITUTE THE FIRST SET
+C                                OF DATA.
+C                     --Y      = THE SINGLE PRECISION VECTOR OF
+C                                (UNSORTED) OBSERVATIONS
+C                                WHICH CONSTITUTE THE SECOND SET
+C                                OF DATA.
+C                     --N      = THE INTEGER NUMBER OF OBSERVATIONS
+C                                IN THE VECTOR X, OR EQUIVALENTLY,
+C                                THE INTEGER NUMBER OF OBSERVATIONS
+C                                IN THE VECTOR Y. 
+C                     --IWRITE = AN INTEGER FLAG CODE WHICH 
+C                                (IF SET TO 0) WILL SUPPRESS
+C                                THE PRINTING OF THE
+C                                SAMPLE CORRELATION COEFFICIENT
+C                                AS IT IS COMPUTED;
+C                                OR (IF SET TO SOME INTEGER 
+C                                VALUE NOT EQUAL TO 0),
+C                                LIKE, SAY, 1) WILL CAUSE
+C                                THE PRINTING OF THE
+C                                SAMPLE CORRELATION COEFFICIENT
+C                                AT THE TIME IT IS COMPUTED.
+C     OUTPUT ARGUMENTS--C      = THE SINGLE PRECISION VALUE OF THE
+C                                COMPUTED SAMPLE CORRELATION COEFFICIENT
+C                                BETWEEN THE 2 SETS OF DATA 
+C                                IN THE INPUT VECTORS X AND Y.
+C                                THIS SINGLE PRECISION VALUE
+C                                WILL BE BETWEEN -1.0 AND 1.0
+C                                (INCLUSIVELY).
+C     OUTPUT--THE COMPUTED SINGLE PRECISION VALUE OF THE
+C             SAMPLE CORRELATION COEFFICIENT BETWEEN THE 2 SETS
+C             OF DATA IN THE INPUT VECTORS X AND Y.
+C     PRINTING--NONE, UNLESS IWRITE HAS BEEN SET TO A NON-ZERO
+C               INTEGER, OR UNLESS AN INPUT ARGUMENT ERROR
+C               CONDITION EXISTS.
+C     RESTRICTIONS--THERE IS NO RESTRICTION ON THE MAXIMUM VALUE
+C                   OF N FOR THIS SUBROUTINE.
+C     OTHER DATAPAC   SUBROUTINES NEEDED--NONE.
+C     FORTRAN LIBRARY SUBROUTINES NEEDED--SQRT.
+C     MODE OF INTERNAL OPERATIONS--SINGLE PRECISION.
+C     LANGUAGE--ANSI FORTRAN. 
+C     REFERENCES--KENDALL AND STUART, THE ADVANCED THEORY OF
+C                 STATISTICS, VOLUME 1, EDITION 2, 1963, PAGES 235-236.
+C               --KENDALL AND STUART, THE ADVANCED THEORY OF
+C                 STATISTICS, VOLUME 2, EDITION 1, 1961, PAGES 292-293.
+C               --SNEDECOR AND COCHRAN, STATISTICAL METHODS,
+C                 EDITION 6, 1967, PAGES 172-198. 
+C     WRITTEN BY--JAMES J. FILLIBEN
+C                 STATISTICAL ENGINEERING LABORATORY (205.03)
+C                 NATIONAL BUREAU OF STANDARDS
+C                 WASHINGTON, D. C. 20234
+C                 PHONE:  301-921-2315
+C     ORIGINAL VERSION--JUNE      1972. 
+C     UPDATED         --SEPTEMBER 1975. 
+C     UPDATED         --NOVEMBER  1975. 
+C
+C---------------------------------------------------------------------
+C
+C      DOUBLE PRECISION X,Y,C
+      DIMENSION X(1),Y(1)
+C
+      IPR=6
+C
+C     CHECK THE INPUT ARGUMENTS FOR ERRORS
+C
+      AN=N
+      C=0.0
+      IFLAG=0
+      IF(N.LT.1)GOTO50
+      IF(N.EQ.1)GOTO55
+      HOLD=X(1)
+      DO60I=2,N
+      IF(X(I).NE.HOLD)GOTO65
+   60 CONTINUE
+c$$$      WRITE(IPR, 9)HOLD
+      IFLAG=1
+   65 HOLD=Y(1)
+      DO70I=2,N
+      IF(Y(I).NE.HOLD)GOTO80
+   70 CONTINUE
+c$$$      WRITE(IPR,19)HOLD
+      IFLAG=1
+   80 IF(IFLAG.EQ.1)RETURN
+      GOTO90
+   50 WRITE(IPR,25) 
+      WRITE(IPR,47)N
+      RETURN
+c$$$   55 WRITE(IPR,28) 
+   55 RETURN
+   90 CONTINUE
+    9 FORMAT(1H ,108H***** NON-FATAL DIAGNOSTIC--THE FIRST  INPUT ARGUME
+     1NT (A VECTOR) TO THE CORR   SUBROUTINE HAS ALL ELEMENTS = ,E15.8,6
+     1H *****)
+   19 FORMAT(1H ,108H***** NON-FATAL DIAGNOSTIC--THE SECOND INPUT ARGUME
+     1NT (A VECTOR) TO THE CORR   SUBROUTINE HAS ALL ELEMENTS = ,E15.8,6
+     1H *****)
+   25 FORMAT(1H , 91H***** FATAL ERROR--THE THIRD  INPUT ARGUMENT TO THE
+     1 CORR   SUBROUTINE IS NON-POSITIVE *****)
+   28 FORMAT(1H ,100H***** NON-FATAL DIAGNOSTIC--THE THIRD  INPUT ARGUME
+     1NT TO THE CORR   SUBROUTINE HAS THE VALUE 1 *****)
+   47 FORMAT(1H , 35H***** THE VALUE OF THE ARGUMENT IS ,I8   ,6H *****)
+C
+C-----START POINT-----------------------------------------------------
+C
+      XBAR=0.0
+      YBAR=0.0
+      DO100I=1,N
+      XBAR=XBAR+X(I)
+      YBAR=YBAR+Y(I)
+  100 CONTINUE
+      XBAR=XBAR/AN
+      YBAR=YBAR/AN
+C
+      SUM1=0.0
+      SUM2=0.0
+      SUM3=0.0
+      DO200I=1,N
+      SUM1=SUM1+(X(I)-XBAR)*(Y(I)-YBAR) 
+      SUM2=SUM2+(X(I)-XBAR)**2
+      SUM3=SUM3+(Y(I)-YBAR)**2
+  200 CONTINUE
+      SUM2=SQRT(SUM2)
+      SUM3=SQRT(SUM3)
+      C   =SUM1/(SUM2*SUM3)
+C
+      IF(IWRITE.NE.0)WRITE(IPR,205)N,C
+  205 FORMAT(1H ,59HTHE LINEAR        CORRELATION COEFFICIENT OF THE 2 S
+     1ETS OF ,I6,17H OBSERVATIONS IS ,F14.5)
+      RETURN
+      END 
